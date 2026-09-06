@@ -1,0 +1,927 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GovSetu — Unified Government Service Delivery</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --navy-900:#0E1729;
+    --navy-700:#16233F;
+    --navy-600:#1D2E4E;
+    --navy-500:#2B3C5E;
+    --gold-500:#C98A2B;
+    --gold-300:#E3B15E;
+    --gold-100:#F5E4C6;
+    --paper:#F7F8FA;
+    --white:#FFFFFF;
+    --ink:#171A1F;
+    --slate:#5B6472;
+    --slate-300:#B7BEC8;
+    --line:#E1E4E9;
+    --success:#2F7D5D;
+    --success-bg:#E7F3EC;
+    --alert:#B4432D;
+    --alert-bg:#FBEAE5;
+    --warn:#96661C;
+    --warn-bg:#FBEFDC;
+    --font-display:'Fraunces', Georgia, serif;
+    --font-body:'IBM Plex Sans', 'Segoe UI', sans-serif;
+    --font-mono:'IBM Plex Mono', 'SFMono-Regular', Menlo, monospace;
+  }
+
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    margin:0;
+    font-family:var(--font-body);
+    color:var(--ink);
+    background:var(--paper);
+    -webkit-font-smoothing:antialiased;
+  }
+  h1,h2,h3,h4{font-family:var(--font-display);margin:0;line-height:1.15;font-weight:600;}
+  p{margin:0;line-height:1.6;}
+  a{color:inherit;}
+  button{font-family:var(--font-body);cursor:pointer;}
+  :focus-visible{outline:2px solid var(--gold-500);outline-offset:2px;}
+
+  /* ---------- layout shell ---------- */
+  #app{display:flex;flex-direction:column;min-height:100vh;}
+
+  .topbar{
+    display:flex;align-items:center;justify-content:space-between;
+    padding:16px 32px;background:var(--navy-900);color:var(--white);
+    position:sticky;top:0;z-index:50;gap:16px;flex-wrap:wrap;
+  }
+  .brand{display:flex;align-items:center;gap:10px;}
+  .brand-mark{
+    width:30px;height:30px;flex:none;
+  }
+  .brand-name{font-family:var(--font-display);font-size:19px;font-weight:600;letter-spacing:0.2px;}
+  .brand-tag{font-size:11.5px;color:var(--slate-300);display:block;margin-top:1px;}
+
+  .tabs{display:flex;gap:4px;background:var(--navy-700);padding:4px;border-radius:8px;overflow-x:auto;}
+  .tab-btn{
+    background:transparent;border:none;color:var(--slate-300);
+    padding:8px 16px;border-radius:6px;font-size:14px;font-weight:500;
+    white-space:nowrap;transition:background .15s ease, color .15s ease;
+  }
+  .tab-btn:hover{color:var(--white);}
+  .tab-btn.active{background:var(--white);color:var(--navy-900);}
+
+  .session-pill{
+    display:flex;align-items:center;gap:8px;font-size:13px;color:var(--slate-300);
+  }
+  .session-pill .dot{width:7px;height:7px;border-radius:50%;background:var(--gold-500);}
+
+  main{flex:1;}
+  .view{display:none;}
+  .view.active{display:block;}
+
+  .wrap{max-width:1120px;margin:0 auto;padding:0 32px;}
+
+  footer{
+    background:var(--navy-900);color:var(--slate-300);padding:28px 32px;font-size:13px;
+  }
+  footer .wrap{display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px;}
+  footer strong{color:var(--white);font-weight:500;}
+
+  /* ---------- buttons ---------- */
+  .btn{
+    display:inline-flex;align-items:center;justify-content:center;gap:8px;
+    padding:12px 22px;border-radius:6px;font-size:14.5px;font-weight:600;
+    border:1px solid transparent;transition:transform .1s ease, background .15s ease;
+  }
+  .btn-primary{background:var(--gold-500);color:var(--navy-900);}
+  .btn-primary:hover{background:var(--gold-300);}
+  .btn-ghost{background:transparent;color:var(--navy-900);border-color:var(--navy-500);}
+  .btn-ghost:hover{background:var(--navy-900);color:var(--white);}
+  .btn-ghost.on-dark{color:var(--white);border-color:rgba(255,255,255,.4);}
+  .btn-ghost.on-dark:hover{background:rgba(255,255,255,.12);}
+  .btn:disabled{opacity:.45;cursor:not-allowed;}
+  .btn:active{transform:translateY(1px);}
+  .btn-block{width:100%;}
+
+  /* ---------- HOME ---------- */
+  .hero{
+    background:var(--navy-900);color:var(--white);
+    padding:72px 0 88px;
+  }
+  .hero-grid{display:grid;grid-template-columns:1.1fr 1fr;gap:48px;align-items:center;}
+  .hero h1{font-size:44px;color:var(--white);max-width:11ch;}
+  .hero .lede{margin-top:20px;font-size:17px;color:var(--slate-300);max-width:46ch;}
+  .hero-actions{display:flex;gap:14px;margin-top:32px;flex-wrap:wrap;}
+  .hero-note{margin-top:18px;font-size:12.5px;color:var(--slate-300);font-family:var(--font-mono);}
+
+  .section{padding:64px 0;border-bottom:1px solid var(--line);}
+  .section-head{max-width:60ch;margin-bottom:36px;}
+  .section-head h2{font-size:28px;}
+  .section-head p{margin-top:10px;color:var(--slate);font-size:15px;}
+
+  .compare{display:grid;grid-template-columns:1fr 1fr;gap:24px;}
+  .compare-col{padding:26px;border-radius:8px;}
+  .compare-col.problem{background:var(--alert-bg);}
+  .compare-col.solution{background:var(--success-bg);}
+  .compare-col h3{font-size:16px;margin-bottom:14px;}
+  .compare-col.problem h3{color:var(--alert);}
+  .compare-col.solution h3{color:var(--success);}
+  .compare-col ul{margin:0;padding-left:18px;font-size:14.5px;color:var(--ink);}
+  .compare-col li{margin-bottom:8px;line-height:1.5;}
+
+  .flow-steps{display:grid;grid-template-columns:repeat(4,1fr);gap:20px;counter-reset:step;}
+  .flow-step{position:relative;padding:20px 18px 18px;background:var(--white);border:1px solid var(--line);border-radius:8px;}
+  .flow-step .num{
+    font-family:var(--font-mono);font-size:13px;color:var(--gold-500);font-weight:500;
+  }
+  .flow-step h4{font-size:15.5px;margin-top:10px;}
+  .flow-step p{font-size:13.5px;color:var(--slate);margin-top:6px;}
+
+  .stat-row{display:grid;grid-template-columns:repeat(3,1fr);gap:24px;}
+  .stat{padding:22px 0;border-top:1px solid var(--line);}
+  .stat .figure{font-family:var(--font-display);font-size:34px;color:var(--navy-700);}
+  .stat .label{margin-top:6px;font-size:13.5px;color:var(--slate);max-width:28ch;}
+
+  .diagram-card{background:var(--white);border:1px solid var(--line);border-radius:10px;padding:24px;}
+  .diagram-card svg{width:100%;height:auto;display:block;}
+
+  /* ---------- LOGIN ---------- */
+  .login-shell{
+    min-height:calc(100vh - 65px);display:flex;align-items:center;justify-content:center;
+    background:var(--navy-900);padding:48px 24px;
+  }
+  .login-card{
+    width:100%;max-width:420px;background:var(--white);border-radius:10px;padding:38px 34px;
+  }
+  .login-card h2{font-size:23px;}
+  .login-card .sub{margin-top:8px;color:var(--slate);font-size:14px;}
+  .login-methods{margin-top:28px;display:flex;flex-direction:column;gap:10px;}
+  .login-divider{display:flex;align-items:center;gap:12px;margin:22px 0;color:var(--slate-300);font-size:12.5px;}
+  .login-divider::before,.login-divider::after{content:"";flex:1;height:1px;background:var(--line);}
+  .field{display:flex;flex-direction:column;gap:6px;margin-bottom:14px;}
+  .field label{font-size:13px;color:var(--slate);}
+  .field input{
+    padding:11px 12px;border:1px solid var(--line);border-radius:6px;font-size:14.5px;font-family:var(--font-mono);
+  }
+  .field input:focus{border-color:var(--navy-500);}
+  .auth-status{
+    display:none;margin-top:18px;padding:12px 14px;background:var(--paper);border-radius:6px;
+    font-size:13.5px;color:var(--slate);align-items:center;gap:10px;
+  }
+  .auth-status.showing{display:flex;}
+  .spinner{
+    width:14px;height:14px;border-radius:50%;border:2px solid var(--line);
+    border-top-color:var(--navy-700);animation:spin .7s linear infinite;flex:none;
+  }
+  @keyframes spin{to{transform:rotate(360deg);}}
+  .login-foot{margin-top:22px;font-size:12px;color:var(--slate-300);text-align:center;}
+
+  /* ---------- DASHBOARD ---------- */
+  .page-head{padding:36px 0 8px;}
+  .page-head h2{font-size:26px;}
+  .page-head .sub{margin-top:6px;color:var(--slate);font-size:14.5px;}
+
+  .dash-grid{display:grid;grid-template-columns:340px 1fr;gap:24px;padding:28px 0 64px;align-items:start;}
+  .panel{background:var(--white);border:1px solid var(--line);border-radius:10px;padding:22px 24px;margin-bottom:20px;}
+  .panel h3{font-size:15px;font-weight:600;margin-bottom:16px;display:flex;align-items:center;justify-content:space-between;}
+
+  .profile-row{display:flex;justify-content:space-between;align-items:baseline;padding:9px 0;border-bottom:1px solid var(--line);gap:12px;}
+  .profile-row:last-child{border-bottom:none;}
+  .profile-row .k{font-size:13px;color:var(--slate);}
+  .profile-row .v{font-size:14px;font-family:var(--font-mono);text-align:right;}
+  .badge{
+    display:inline-block;font-size:10.5px;font-family:var(--font-body);font-weight:600;
+    padding:2px 7px;border-radius:20px;margin-left:8px;vertical-align:middle;
+  }
+  .badge.aadhaar{background:#EAF1FB;color:#2B5695;}
+  .badge.digilocker{background:#EDE8FB;color:#5A3FA6;}
+  .badge.gst{background:#FDEEE3;color:#B3591E;}
+  .badge.state{background:var(--success-bg);color:var(--success);}
+
+  .status-list{display:flex;flex-direction:column;gap:0;}
+  .status-item{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--line);font-size:14px;}
+  .status-item:last-child{border-bottom:none;}
+  .status-dot{width:8px;height:8px;border-radius:50%;flex:none;}
+  .status-dot.ok{background:var(--success);}
+  .status-dot.warn{background:var(--warn);}
+  .status-item .name{flex:1;}
+  .status-item .state{font-size:12.5px;color:var(--slate);}
+
+  .doc-list{display:flex;flex-direction:column;}
+  .doc-item{display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-bottom:1px solid var(--line);}
+  .doc-item:last-child{border-bottom:none;}
+  .doc-item .name{font-size:14.5px;font-weight:500;}
+  .doc-item .src{font-size:12px;color:var(--slate);margin-top:2px;}
+  .doc-item button{background:none;border:1px solid var(--line);border-radius:6px;padding:6px 14px;font-size:13px;color:var(--navy-700);}
+  .doc-item button:hover{background:var(--paper);}
+
+  table.req-table{width:100%;border-collapse:collapse;font-size:14px;}
+  table.req-table th{
+    text-align:left;font-size:12px;text-transform:none;color:var(--slate);
+    font-weight:500;padding:0 0 10px;border-bottom:1px solid var(--line);
+  }
+  table.req-table td{padding:13px 0;border-bottom:1px solid var(--line);vertical-align:top;}
+  table.req-table tr:last-child td{border-bottom:none;}
+  .pill{display:inline-flex;align-items:center;gap:6px;font-size:12.5px;padding:3px 10px;border-radius:20px;}
+  .pill.progress{background:var(--warn-bg);color:var(--warn);}
+  .pill.done{background:var(--success-bg);color:var(--success);}
+
+  .cta-band{
+    background:var(--navy-900);color:var(--white);border-radius:10px;
+    padding:26px 28px;display:flex;justify-content:space-between;align-items:center;gap:20px;flex-wrap:wrap;
+  }
+  .cta-band h4{font-size:18px;color:var(--white);}
+  .cta-band p{color:var(--slate-300);font-size:13.5px;margin-top:4px;}
+
+  /* ---------- APPLY ---------- */
+  .apply-grid{display:grid;grid-template-columns:1fr 1fr;gap:28px;padding:28px 0 72px;align-items:start;}
+  .bundle-option{
+    display:flex;gap:14px;padding:16px;border:1px solid var(--line);border-radius:8px;margin-bottom:12px;cursor:pointer;
+  }
+  .bundle-option.selected{border-color:var(--navy-700);background:#F2F4F8;}
+  .bundle-option input{margin-top:3px;}
+  .bundle-option .t{font-size:14.5px;font-weight:600;}
+  .bundle-option .d{font-size:13px;color:var(--slate);margin-top:4px;}
+  .bundle-option.disabled{opacity:.5;cursor:not-allowed;}
+  .soon{font-size:11px;font-family:var(--font-mono);color:var(--slate);}
+
+  .log-panel{background:var(--navy-900);color:var(--white);border-radius:10px;padding:24px;min-height:420px;}
+  .log-panel h3{color:var(--white);font-size:15px;margin-bottom:4px;}
+  .log-panel .sub{color:var(--slate-300);font-size:12.5px;margin-bottom:18px;}
+  .log-entry{
+    display:flex;gap:10px;font-family:var(--font-mono);font-size:12.8px;
+    padding:9px 0;border-bottom:1px solid rgba(255,255,255,.08);
+    opacity:0;transform:translateY(4px);animation:reveal .35s ease forwards;
+  }
+  @keyframes reveal{to{opacity:1;transform:translateY(0);}}
+  .log-entry .tick{color:var(--gold-500);flex:none;width:14px;}
+  .log-entry .txt{color:#D9DEE7;}
+  .log-entry.pending .tick{color:var(--slate-300);}
+  .progress-track{height:4px;background:rgba(255,255,255,.12);border-radius:4px;margin:18px 0;overflow:hidden;}
+  .progress-fill{height:100%;background:var(--gold-500);width:0%;transition:width .5s ease;}
+  .confirm-card{
+    margin-top:16px;padding:16px;background:rgba(47,125,93,.16);border:1px solid rgba(47,125,93,.4);
+    border-radius:8px;display:none;
+  }
+  .confirm-card.show{display:block;}
+  .confirm-card .ref{font-family:var(--font-mono);color:var(--gold-300);font-size:13.5px;}
+
+  /* ---------- CONSOLE ---------- */
+  .console-grid{padding:28px 0 30px;display:flex;flex-direction:column;gap:22px;}
+  table.dept-table{width:100%;border-collapse:collapse;font-size:13.5px;}
+  table.dept-table th{
+    text-align:left;font-size:11.5px;color:var(--slate);font-weight:500;
+    padding:0 14px 10px 0;border-bottom:1px solid var(--line);
+  }
+  table.dept-table td{padding:13px 14px 13px 0;border-bottom:1px solid var(--line);}
+  table.dept-table tr:last-child td{border-bottom:none;}
+  .status-tag{display:inline-flex;align-items:center;gap:6px;font-size:12.5px;font-weight:500;}
+  .status-tag .status-dot{width:7px;height:7px;}
+  .mono{font-family:var(--font-mono);font-size:13px;}
+
+  .console-cols{display:grid;grid-template-columns:1.1fr 1fr;gap:22px;align-items:start;}
+  .feed{max-height:280px;overflow-y:auto;}
+  .feed-row{display:grid;grid-template-columns:88px 1fr auto;gap:10px;padding:9px 0;border-bottom:1px solid var(--line);font-size:12.8px;align-items:center;}
+  .feed-row:last-child{border-bottom:none;}
+  .feed-row .t{font-family:var(--font-mono);color:var(--slate);}
+  .feed-row .r{color:var(--ink);}
+  .tag-match{color:var(--success);font-weight:500;}
+  .tag-transform{color:var(--warn);font-weight:500;}
+
+  .chart-card{background:var(--white);border:1px solid var(--line);border-radius:10px;padding:22px;}
+  .chart-card h3{font-size:14.5px;margin-bottom:2px;}
+  .chart-card .note{font-size:12px;color:var(--slate);margin-bottom:14px;}
+  .chart-card svg{width:100%;height:auto;}
+
+  .stack-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px 28px;font-size:13.5px;}
+  .stack-row{display:flex;justify-content:space-between;gap:12px;padding:8px 0;border-bottom:1px solid var(--line);}
+  .stack-row .k{color:var(--slate);}
+  .stack-row .v{font-family:var(--font-mono);font-size:12.5px;text-align:right;}
+
+  /* ---------- responsive ---------- */
+  @media (max-width:900px){
+    .hero-grid{grid-template-columns:1fr;}
+    .hero h1{font-size:34px;max-width:none;}
+    .compare{grid-template-columns:1fr;}
+    .flow-steps{grid-template-columns:1fr 1fr;}
+    .stat-row{grid-template-columns:1fr;}
+    .dash-grid{grid-template-columns:1fr;}
+    .apply-grid{grid-template-columns:1fr;}
+    .console-cols{grid-template-columns:1fr;}
+    .stack-grid{grid-template-columns:1fr;}
+    .wrap{padding:0 20px;}
+    .topbar{padding:14px 18px;}
+  }
+  @media (prefers-reduced-motion:reduce){
+    html{scroll-behavior:auto;}
+    .log-entry{animation:none;opacity:1;transform:none;}
+    .spinner{animation:none;}
+  }
+</style>
+</head>
+<body>
+<div id="app">
+
+  <nav class="topbar">
+    <div class="brand">
+      <svg class="brand-mark" viewBox="0 0 32 32" fill="none">
+        <path d="M4 22c4-9 8-13 12-13s8 4 12 13" stroke="#C98A2B" stroke-width="2.4" stroke-linecap="round"/>
+        <circle cx="4" cy="23" r="2.4" fill="#FFFFFF"/>
+        <circle cx="16" cy="9" r="2.4" fill="#C98A2B"/>
+        <circle cx="28" cy="23" r="2.4" fill="#FFFFFF"/>
+      </svg>
+      <div>
+        <span class="brand-name">GovSetu</span>
+        <span class="brand-tag">Interoperability layer for government services</span>
+      </div>
+    </div>
+    <div class="tabs" role="tablist" aria-label="Prototype sections">
+      <button class="tab-btn active" data-view="home">Home</button>
+      <button class="tab-btn" data-view="login">Sign in</button>
+      <button class="tab-btn" data-view="dashboard">Dashboard</button>
+      <button class="tab-btn" data-view="apply">Apply</button>
+      <button class="tab-btn" data-view="console">Console</button>
+    </div>
+    <div class="session-pill"><span class="dot"></span> Prototype build · not connected to live department systems</div>
+  </nav>
+
+  <main>
+
+    <!-- ============ HOME ============ -->
+    <section class="view active" id="view-home">
+      <div class="hero">
+        <div class="wrap hero-grid">
+          <div>
+            <h1>One identity. Every department. No repeated paperwork.</h1>
+            <p class="lede">Aadhaar, DigiLocker, GST and state e-Governance portals each speak a different data language today, so citizens resubmit the same documents at every counter. GovSetu sits between them as a translation layer, so a request made once reaches every department that needs it.</p>
+            <div class="hero-actions">
+              <button class="btn btn-primary" data-goto="login">Open citizen dashboard</button>
+              <button class="btn btn-ghost on-dark" data-goto="console">View interoperability console</button>
+            </div>
+            <div class="hero-note">SIH26129 · System Integration &amp; Interoperability Among Government Digital Platforms · Team Ctrl Alt Destroy</div>
+          </div>
+          <div class="diagram-card" style="background:var(--navy-700);border-color:var(--navy-500);">
+            <svg viewBox="0 0 460 300" xmlns="http://www.w3.org/2000/svg">
+              <!-- connecting lines -->
+              <path d="M70,40 C 200,40 210,150 260,150" stroke="#3C4E74" stroke-width="2" fill="none"/>
+              <path d="M70,110 C 200,110 210,150 260,150" stroke="#3C4E74" stroke-width="2" fill="none"/>
+              <path d="M70,190 C 200,190 210,150 260,150" stroke="#3C4E74" stroke-width="2" fill="none"/>
+              <path d="M70,260 C 200,260 210,150 260,150" stroke="#3C4E74" stroke-width="2" fill="none"/>
+              <path d="M260,150 C 330,150 340,150 400,150" stroke="#C98A2B" stroke-width="2.5" fill="none"/>
+              <!-- left nodes -->
+              <g font-family="IBM Plex Sans, sans-serif" font-size="12" fill="#D9DEE7">
+                <circle cx="60" cy="40" r="7" fill="#8FB2E0"/><text x="18" y="24">Aadhaar</text>
+                <circle cx="60" cy="110" r="7" fill="#B39CE0"/><text x="8" y="94">DigiLocker</text>
+                <circle cx="60" cy="190" r="7" fill="#E0A87E"/><text x="32" y="174">GST</text>
+                <circle cx="60" cy="260" r="7" fill="#8FCBAE"/><text x="0" y="244">State e-Gov</text>
+              </g>
+              <!-- hub -->
+              <circle cx="260" cy="150" r="26" fill="#0E1729" stroke="#C98A2B" stroke-width="2"/>
+              <text x="260" y="154" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="10.5" fill="#E3B15E">GovSetu</text>
+              <!-- citizen node -->
+              <circle cx="415" cy="150" r="20" fill="#1D2E4E" stroke="#C98A2B" stroke-width="1.5"/>
+              <text x="415" y="154" text-anchor="middle" font-family="IBM Plex Sans, sans-serif" font-size="10" fill="#FFFFFF">Citizen</text>
+              <text x="130" y="290" font-family="IBM Plex Mono, monospace" font-size="10" fill="#7C88A0">protocol + schema translation, live</text>
+            </svg>
+          </div>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="wrap">
+          <div class="section-head">
+            <h2>The gap between departments, and what closes it</h2>
+            <p>Every portal already works on its own. The friction is at the seams between them.</p>
+          </div>
+          <div class="compare">
+            <div class="compare-col problem">
+              <h3>Today, without interoperability</h3>
+              <ul>
+                <li>Citizens resubmit identity and address proof at every department counter.</li>
+                <li>Cross-department services stall waiting for manual verification.</li>
+                <li>Each new integration is a custom, point-to-point build.</li>
+                <li>No shared view of where a request is stuck, or why.</li>
+              </ul>
+            </div>
+            <div class="compare-col solution">
+              <h3>With GovSetu in between</h3>
+              <ul>
+                <li>A lightweight API gateway translates protocols and formats in real time.</li>
+                <li>An AI schema-mapping model auto-detects matching fields across databases.</li>
+                <li>Legacy systems connect through thin adapters — no core rewrite.</li>
+                <li>A live dashboard flags mismatches and failed handshakes as they happen.</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="wrap">
+          <div class="section-head">
+            <h2>How a request moves through the system</h2>
+            <p>The same four-step path every request follows, whether it is met by a matching field or not.</p>
+          </div>
+          <div class="flow-steps">
+            <div class="flow-step">
+              <div class="num">01</div>
+              <h4>Citizen request</h4>
+              <p>Submitted once through the unified portal, with single sign-on.</p>
+            </div>
+            <div class="flow-step">
+              <div class="num">02</div>
+              <h4>Schema check</h4>
+              <p>The AI mapper checks whether fields and protocols already correspond.</p>
+            </div>
+            <div class="flow-step">
+              <div class="num">03</div>
+              <h4>Route or transform</h4>
+              <p>A match routes straight to the department system; a mismatch goes through the adaptive transform layer.</p>
+            </div>
+            <div class="flow-step">
+              <div class="num">04</div>
+              <h4>Aggregated response</h4>
+              <p>Results are combined and returned to the citizen dashboard as one status.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="section" style="border-bottom:none;">
+        <div class="wrap">
+          <div class="section-head">
+            <h2>Where this is realistic, not aspirational</h2>
+            <p>Figures below are drawn from the feasibility analysis in our submission, not projected outcomes.</p>
+          </div>
+          <div class="stat-row">
+            <div class="stat">
+              <div class="figure">~80%</div>
+              <div class="label">of the technical approach is achievable using existing India Stack APIs and open standards.</div>
+            </div>
+            <div class="stat">
+              <div class="figure">2–3</div>
+              <div class="label">department sandbox APIs needed for a pilot integration within the hackathon window.</div>
+            </div>
+            <div class="stat">
+              <div class="figure">1 window</div>
+              <div class="label">instead of four separate portals, once a department is onboarded.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ LOGIN ============ -->
+    <section class="view" id="view-login">
+      <div class="login-shell">
+        <div class="login-card">
+          <h2>Sign in to GovSetu</h2>
+          <p class="sub">Authenticate once — Aadhaar, DigiLocker and your state e-Governance profile are linked behind the same session.</p>
+          <div class="login-methods">
+            <button class="btn btn-primary btn-block" id="btn-digilocker">Continue with DigiLocker eSign</button>
+            <button class="btn btn-ghost btn-block" id="btn-aadhaar-toggle">Use Aadhaar OTP instead</button>
+          </div>
+
+          <div id="aadhaar-form" style="display:none;margin-top:20px;">
+            <div class="login-divider">Aadhaar sign-in</div>
+            <div class="field">
+              <label for="aadhaar-num">Aadhaar number</label>
+              <input id="aadhaar-num" type="text" placeholder="XXXX XXXX 4821" maxlength="14">
+            </div>
+            <div class="field">
+              <label for="otp-num">One-time password</label>
+              <input id="otp-num" type="text" placeholder="6-digit OTP" maxlength="6">
+            </div>
+            <button class="btn btn-primary btn-block" id="btn-otp-submit">Verify and continue</button>
+          </div>
+
+          <div class="auth-status" id="auth-status">
+            <div class="spinner"></div>
+            <span id="auth-status-text">Authenticating via DigiLocker eSign…</span>
+          </div>
+
+          <p class="login-foot">Secured with OAuth 2.0 + DigiLocker eSign · demo credentials, no real Aadhaar or DigiLocker data is used</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ DASHBOARD ============ -->
+    <section class="view" id="view-dashboard">
+      <div class="wrap">
+        <div class="page-head">
+          <h2>Welcome back, Aditi Sharma</h2>
+          <p class="sub">Fields below are merged live from the department systems you're linked to.</p>
+        </div>
+
+        <div class="dash-grid">
+          <div>
+            <div class="panel">
+              <h3>Profile</h3>
+              <div class="profile-row"><span class="k">Name</span><span class="v">Aditi Sharma<span class="badge aadhaar">Aadhaar</span></span></div>
+              <div class="profile-row"><span class="k">Date of birth</span><span class="v">14-03-1994<span class="badge aadhaar">Aadhaar</span></span></div>
+              <div class="profile-row"><span class="k">Aadhaar</span><span class="v">XXXX XXXX 4821</span></div>
+              <div class="profile-row"><span class="k">Address</span><span class="v">Sambhajinagar, MH<span class="badge digilocker">DigiLocker</span></span></div>
+              <div class="profile-row"><span class="k">GSTIN</span><span class="v">27AAECS4821Q1Z2<span class="badge gst">GST</span></span></div>
+            </div>
+
+            <div class="panel">
+              <h3>Connected departments</h3>
+              <div class="status-list">
+                <div class="status-item"><span class="status-dot ok"></span><span class="name">Aadhaar (UIDAI)</span><span class="state">Connected</span></div>
+                <div class="status-item"><span class="status-dot ok"></span><span class="name">DigiLocker</span><span class="state">Connected</span></div>
+                <div class="status-item"><span class="status-dot ok"></span><span class="name">GST Network</span><span class="state">Connected</span></div>
+                <div class="status-item"><span class="status-dot warn"></span><span class="name">State e-Governance — Maharashtra</span><span class="state">Schema mismatch flagged</span></div>
+              </div>
+            </div>
+          </div>
+
+          <div>
+            <div class="panel">
+              <h3>Document vault</h3>
+              <div class="doc-list">
+                <div class="doc-item"><div><div class="name">Aadhaar card</div><div class="src">via Aadhaar</div></div><button>View</button></div>
+                <div class="doc-item"><div><div class="name">PAN card</div><div class="src">via DigiLocker</div></div><button>View</button></div>
+                <div class="doc-item"><div><div class="name">GST registration certificate</div><div class="src">via GST Network</div></div><button>View</button></div>
+                <div class="doc-item"><div><div class="name">Birth certificate</div><div class="src">via State e-Governance — Maharashtra</div></div><button>View</button></div>
+              </div>
+            </div>
+
+            <div class="panel">
+              <h3>Active and recent requests</h3>
+              <table class="req-table">
+                <thead><tr><th>Request</th><th>Departments involved</th><th>Status</th></tr></thead>
+                <tbody id="req-table-body">
+                  <tr>
+                    <td>School admission bundle</td>
+                    <td>Aadhaar, Municipal Birth Registry, School Admission Portal</td>
+                    <td><span class="pill progress">Awaiting verification</span></td>
+                  </tr>
+                  <tr>
+                    <td>Birth certificate — address correction</td>
+                    <td>State e-Governance — Maharashtra</td>
+                    <td><span class="pill done">Completed</span></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <div class="cta-band">
+              <div>
+                <h4>Have a service that spans departments?</h4>
+                <p>Submit it once — GovSetu routes it to every department it touches.</p>
+              </div>
+              <button class="btn btn-primary" data-goto="apply">Apply for a service</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ APPLY ============ -->
+    <section class="view" id="view-apply">
+      <div class="wrap">
+        <div class="page-head">
+          <h2>Apply for a service</h2>
+          <p class="sub">Choose a bundle. GovSetu identifies which departments are involved and maps the fields between them automatically.</p>
+        </div>
+
+        <div class="apply-grid">
+          <div>
+            <div class="panel" style="margin-bottom:0;">
+              <h3>Available bundles</h3>
+              <label class="bundle-option selected" id="bundle-birth">
+                <input type="radio" name="bundle" checked>
+                <div>
+                  <div class="t">Birth certificate + Aadhaar update + school admission</div>
+                  <div class="d">Our phase-one pilot bundle — the high-impact case cited in the submission's rollout strategy.</div>
+                </div>
+              </label>
+              <label class="bundle-option disabled">
+                <input type="radio" name="bundle" disabled>
+                <div>
+                  <div class="t">GST registration update <span class="soon">Coming soon</span></div>
+                  <div class="d">Planned for phase two, once GST Network sandbox access is confirmed.</div>
+                </div>
+              </label>
+              <label class="bundle-option disabled">
+                <input type="radio" name="bundle" disabled>
+                <div>
+                  <div class="t">Property mutation <span class="soon">Coming soon</span></div>
+                  <div class="d">Planned for phase two, pending state land-records API access.</div>
+                </div>
+              </label>
+              <button class="btn btn-primary btn-block" id="btn-submit-request" style="margin-top:18px;">Submit request</button>
+              <button class="btn btn-ghost btn-block" id="btn-reset-request" style="margin-top:10px;">Reset demo</button>
+            </div>
+          </div>
+
+          <div class="log-panel">
+            <h3>Live interoperability log</h3>
+            <div class="sub">What happens between submission and confirmation</div>
+            <div class="progress-track"><div class="progress-fill" id="apply-progress"></div></div>
+            <div id="log-entries"></div>
+            <div class="confirm-card" id="confirm-card">
+              <div>Request bundled and confirmed.</div>
+              <div class="ref">Reference no. GS-2026-004821</div>
+              <button class="btn btn-ghost on-dark" style="margin-top:12px;" data-goto="dashboard">View in dashboard</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ CONSOLE ============ -->
+    <section class="view" id="view-console">
+      <div class="wrap">
+        <div class="page-head">
+          <h2>Interoperability console</h2>
+          <p class="sub">Live status across every connected department system — built for the integration team, not the citizen.</p>
+        </div>
+
+        <div class="console-grid">
+          <div class="panel" style="margin-bottom:0;">
+            <h3>Department connections</h3>
+            <table class="dept-table">
+              <thead><tr><th>Department</th><th>Connector</th><th>Status</th><th>Avg. latency</th><th>Schema match rate</th></tr></thead>
+              <tbody>
+                <tr>
+                  <td>Aadhaar (UIDAI)</td><td class="mono">eKYC API</td>
+                  <td><span class="status-tag"><span class="status-dot ok"></span>Connected</span></td>
+                  <td class="mono">180 ms</td><td class="mono">99%</td>
+                </tr>
+                <tr>
+                  <td>DigiLocker</td><td class="mono">OAuth 2.0 + eSign</td>
+                  <td><span class="status-tag"><span class="status-dot ok"></span>Connected</span></td>
+                  <td class="mono">220 ms</td><td class="mono">97%</td>
+                </tr>
+                <tr>
+                  <td>GST Network</td><td class="mono">REST / OpenAPI</td>
+                  <td><span class="status-tag"><span class="status-dot ok"></span>Connected</span></td>
+                  <td class="mono">340 ms</td><td class="mono">94%</td>
+                </tr>
+                <tr>
+                  <td>State e-Governance — Maharashtra</td><td class="mono">Legacy SOAP adapter</td>
+                  <td><span class="status-tag"><span class="status-dot warn"></span>Degraded — mismatch flagged</span></td>
+                  <td class="mono">610 ms</td><td class="mono">81%</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="console-cols">
+            <div class="panel" style="margin-bottom:0;">
+              <h3>Live request feed</h3>
+              <div class="feed" id="live-feed"></div>
+            </div>
+            <div class="panel" style="margin-bottom:0;">
+              <h3>Software stack</h3>
+              <div class="stack-grid">
+                <div class="stack-row"><span class="k">API gateway</span><span class="v">Kong / Node.js</span></div>
+                <div class="stack-row"><span class="k">Schema mapper</span><span class="v">Python, NLP</span></div>
+                <div class="stack-row"><span class="k">Message queue</span><span class="v">Kafka / RabbitMQ</span></div>
+                <div class="stack-row"><span class="k">Data store</span><span class="v">PostgreSQL / MongoDB</span></div>
+                <div class="stack-row"><span class="k">Auth</span><span class="v">OAuth 2.0 + DigiLocker eSign</span></div>
+                <div class="stack-row"><span class="k">Frontend</span><span class="v">React.js</span></div>
+                <div class="stack-row"><span class="k">Deployment</span><span class="v">Docker / Kubernetes (MeghRaj)</span></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="console-cols">
+            <div class="chart-card">
+              <h3>Cross-department service delay reports</h3>
+              <div class="note">Illustrative baseline cited in problem analysis, 2022–2026 — the trend GovSetu targets reducing as departments onboard.</div>
+              <svg id="chart-delay" viewBox="0 0 420 220"></svg>
+            </div>
+            <div class="chart-card">
+              <h3>Schema match rate by department</h3>
+              <div class="note">From the connections table above — updates as more department pairs are trained.</div>
+              <svg id="chart-match" viewBox="0 0 420 220"></svg>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <footer>
+    <div class="wrap">
+      <div>
+        <div><strong>GovSetu</strong> — prototype build for Smart India Hackathon 2026</div>
+        <div>Problem statement SIH26129 · Team Ctrl Alt Destroy</div>
+      </div>
+      <div>GitHub: github.com/your-team/GovSetu.git</div>
+    </div>
+  </footer>
+</div>
+
+<script>
+(function(){
+  "use strict";
+
+  /* ---------- navigation ---------- */
+  var tabButtons = document.querySelectorAll(".tab-btn");
+  var gotoButtons = document.querySelectorAll("[data-goto]");
+  var views = document.querySelectorAll(".view");
+
+  function showView(name){
+    views.forEach(function(v){ v.classList.toggle("active", v.id === "view-" + name); });
+    tabButtons.forEach(function(b){ b.classList.toggle("active", b.dataset.view === name); });
+    window.scrollTo({top:0, behavior:"instant" in window ? "instant" : "auto"});
+  }
+
+  tabButtons.forEach(function(b){
+    b.addEventListener("click", function(){ showView(b.dataset.view); });
+  });
+  gotoButtons.forEach(function(b){
+    b.addEventListener("click", function(){ showView(b.dataset.goto); });
+  });
+
+  /* ---------- login simulation ---------- */
+  var authStatus = document.getElementById("auth-status");
+  var authStatusText = document.getElementById("auth-status-text");
+  var aadhaarForm = document.getElementById("aadhaar-form");
+
+  document.getElementById("btn-aadhaar-toggle").addEventListener("click", function(){
+    aadhaarForm.style.display = aadhaarForm.style.display === "none" ? "block" : "none";
+  });
+
+  function runAuth(message){
+    authStatusText.textContent = message;
+    authStatus.classList.add("showing");
+    setTimeout(function(){
+      authStatus.classList.remove("showing");
+      showView("dashboard");
+    }, 1300);
+  }
+
+  document.getElementById("btn-digilocker").addEventListener("click", function(){
+    runAuth("Authenticating via DigiLocker eSign…");
+  });
+  document.getElementById("btn-otp-submit").addEventListener("click", function(){
+    runAuth("Verifying Aadhaar OTP…");
+  });
+
+  /* ---------- apply flow simulation ---------- */
+  var logEntries = document.getElementById("log-entries");
+  var progressFill = document.getElementById("apply-progress");
+  var confirmCard = document.getElementById("confirm-card");
+  var submitBtn = document.getElementById("btn-submit-request");
+  var resetBtn = document.getElementById("btn-reset-request");
+  var reqTableBody = document.getElementById("req-table-body");
+  var requestAdded = false;
+
+  var steps = [
+    "Citizen request received — birth certificate + Aadhaar update + school admission",
+    "AI schema mapper comparing fields across Aadhaar, Municipal Birth Registry and School Admission Portal…",
+    "Match found — 11 of 12 fields auto-mapped",
+    "1 field (guardian occupation code) routed through the adaptive transform layer",
+    "Routing mapped requests to department systems via API gateway",
+    "Aggregating department responses…",
+    "Request bundled and confirmed"
+  ];
+
+  var timers = [];
+
+  function resetLog(){
+    timers.forEach(clearTimeout);
+    timers = [];
+    logEntries.innerHTML = "";
+    progressFill.style.width = "0%";
+    confirmCard.classList.remove("show");
+    submitBtn.disabled = false;
+    var existing = document.getElementById("row-just-submitted");
+    if (existing) existing.remove();
+    requestAdded = false;
+  }
+
+  function addRequestToDashboard(){
+    if (requestAdded) return;
+    requestAdded = true;
+    var row = document.createElement("tr");
+    row.id = "row-just-submitted";
+    row.innerHTML =
+      '<td>Birth certificate + Aadhaar update + school admission <span class="mono" style="color:var(--slate);font-size:11.5px;display:block;margin-top:2px;">Ref: GS-2026-004821</span></td>' +
+      '<td>Aadhaar, Municipal Birth Registry, School Admission Portal</td>' +
+      '<td><span class="pill progress">Awaiting verification</span></td>';
+    reqTableBody.insertBefore(row, reqTableBody.firstChild);
+  }
+
+  function runApply(){
+    resetLog();
+    submitBtn.disabled = true;
+    steps.forEach(function(text, i){
+      var t = setTimeout(function(){
+        var row = document.createElement("div");
+        row.className = "log-entry";
+        row.innerHTML = '<span class="tick">✓</span><span class="txt">' + text + "</span>";
+        logEntries.appendChild(row);
+        progressFill.style.width = Math.round(((i + 1) / steps.length) * 100) + "%";
+        if (i === steps.length - 1){
+          confirmCard.classList.add("show");
+          submitBtn.disabled = false;
+          addRequestToDashboard();
+          var navTimer = setTimeout(function(){ showView("dashboard"); }, 1600);
+          timers.push(navTimer);
+        }
+      }, i * 750);
+      timers.push(t);
+    });
+  }
+
+  submitBtn.addEventListener("click", runApply);
+  resetBtn.addEventListener("click", resetLog);
+
+  /* ---------- console: live feed ---------- */
+  var feed = document.getElementById("live-feed");
+  var feedRows = [
+    ["09:41:02", "GS-004818 · Aadhaar → School Admission", "match"],
+    ["09:40:47", "GS-004817 · DigiLocker → GST Network", "match"],
+    ["09:40:19", "GS-004816 · State e-Gov (MH) → Aadhaar", "transform"],
+    ["09:39:55", "GS-004815 · Aadhaar → DigiLocker", "match"],
+    ["09:39:22", "GS-004814 · GST Network → State e-Gov (MH)", "transform"],
+    ["09:38:58", "GS-004813 · Aadhaar → Municipal Birth Registry", "match"]
+  ];
+  feedRows.forEach(function(r){
+    var row = document.createElement("div");
+    row.className = "feed-row";
+    var tagClass = r[2] === "match" ? "tag-match" : "tag-transform";
+    var tagText = r[2] === "match" ? "Matched" : "Adaptive transform";
+    row.innerHTML = '<span class="t">' + r[0] + '</span><span class="r">' + r[1] + '</span><span class="' + tagClass + '">' + tagText + "</span>";
+    feed.appendChild(row);
+  });
+
+  /* ---------- console: charts (hand-drawn SVG bars) ---------- */
+  function drawBarChart(svgEl, labels, values, opts){
+    opts = opts || {};
+    var w = 420, h = 220, padL = 34, padB = 28, padT = 14, padR = 10;
+    var chartW = w - padL - padR, chartH = h - padT - padB;
+    var max = opts.max || Math.max.apply(null, values) * 1.15;
+    var barGap = 14;
+    var barW = (chartW - barGap * (values.length - 1)) / values.length;
+    var ns = "http://www.w3.org/2000/svg";
+    svgEl.setAttribute("viewBox", "0 0 " + w + " " + h);
+    while (svgEl.firstChild) svgEl.removeChild(svgEl.firstChild);
+
+    var axis = document.createElementNS(ns, "line");
+    axis.setAttribute("x1", padL); axis.setAttribute("x2", padL);
+    axis.setAttribute("y1", padT); axis.setAttribute("y2", h - padB);
+    axis.setAttribute("stroke", "#E1E4E9");
+    svgEl.appendChild(axis);
+    var base = document.createElementNS(ns, "line");
+    base.setAttribute("x1", padL); base.setAttribute("x2", w - padR);
+    base.setAttribute("y1", h - padB); base.setAttribute("y2", h - padB);
+    base.setAttribute("stroke", "#E1E4E9");
+    svgEl.appendChild(base);
+
+    values.forEach(function(v, i){
+      var barH = (v / max) * chartH;
+      var x = padL + i * (barW + barGap);
+      var y = h - padB - barH;
+      var rect = document.createElementNS(ns, "rect");
+      rect.setAttribute("x", x); rect.setAttribute("y", y);
+      rect.setAttribute("width", barW); rect.setAttribute("height", barH);
+      rect.setAttribute("fill", opts.color || "#16233F");
+      rect.setAttribute("rx", "2");
+      svgEl.appendChild(rect);
+
+      var val = document.createElementNS(ns, "text");
+      val.setAttribute("x", x + barW / 2); val.setAttribute("y", y - 6);
+      val.setAttribute("text-anchor", "middle");
+      val.setAttribute("font-family", "IBM Plex Mono, monospace");
+      val.setAttribute("font-size", "11");
+      val.setAttribute("fill", "#5B6472");
+      val.textContent = opts.suffix ? v + opts.suffix : v;
+      svgEl.appendChild(val);
+
+      var lab = document.createElementNS(ns, "text");
+      lab.setAttribute("x", x + barW / 2); lab.setAttribute("y", h - padB + 16);
+      lab.setAttribute("text-anchor", "middle");
+      lab.setAttribute("font-family", "IBM Plex Sans, sans-serif");
+      lab.setAttribute("font-size", "11");
+      lab.setAttribute("fill", "#171A1F");
+      lab.textContent = labels[i];
+      svgEl.appendChild(lab);
+    });
+  }
+
+  drawBarChart(
+    document.getElementById("chart-delay"),
+    ["2022","2023","2024","2025","2026"],
+    [60,115,210,300,340],
+    {color:"#B4432D"}
+  );
+  drawBarChart(
+    document.getElementById("chart-match"),
+    ["Aadhaar","DigiLocker","GST","State (MH)"],
+    [99,97,94,81],
+    {color:"#2F7D5D", suffix:"%", max:110}
+  );
+
+})();
+</script>
+</body>
+</html>
